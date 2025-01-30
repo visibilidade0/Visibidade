@@ -30,6 +30,13 @@ body {
     text-align: center;
 }
 
+/* Logo */
+.logo {
+    max-width: 100%; /* Limita a largura da imagem a 100% do contêiner */
+    height: auto; /* Mantém a proporção da imagem */
+    margin-bottom: 20px;
+}
+
 /* Título */
 h1 {
     font-size: 2rem;
@@ -128,6 +135,11 @@ button:hover {
         font-size: 1.3rem;
         padding: 12px;
     }
+
+    /* Ajusta o logo para telas menores */
+    .logo {
+        max-width: 80%; /* Reduz o tamanho máximo em telas menores */
+    }
 }
 
 @media screen and (max-width: 480px) {
@@ -143,5 +155,10 @@ button:hover {
     #resultado {
         font-size: 1.2rem;
         padding: 12px;
+    }
+
+    /* Ajusta o logo para telas pequenas */
+    .logo {
+        max-width: 70%; /* Reduz ainda mais o logo para telas muito pequenas */
     }
 }
