@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VISIBILIDADE DISPONIBILIDADE</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+      <img src="SPX.png" alt="Logo" class="logo">
+        <h1>Ver Disponibilidade</h1>
+
+        
+        <input type="text" id="idInput" placeholder="Digite o ID" autocomplete="off">
+        <button onclick="buscarDados()">Buscar</button>
+
+        <p id="resultado"></p>
+    </div>
+
+    <script>
+        const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ-hKOqN7c63ej77oW7CF19_w6L9YqkAjDogv4wwow93kdAhmAVIIi4XxFz7R3dy_MwMwAAuzU1tf8K/pub?output=csv';
+
+        async function buscarDados() {
+            const id = document.getElementById('idInput').value;
+            if (!id) {
+                alert('Digite um ID!');
+                return;
+            }
+
+            try {
+                const response = await fetch(sheetUrl);
+                const csvText = await response.text();
+                const rows = csvText.split('\n').map(row => row.split(','));
+                let resultado = 'ID não encontrado!';
+
+                for (let i = 1; i < rows.length; i++) {
+                    const row = rows[i];
+                    if (row[0] === id) {
+                        resultado = `Nome: ${row[1]}, Disponibilidade: ${row[2]}`;
+                        break;
+                    }
+                }
+
+                document.getElementById('resultado').innerText = resultado;
+
+            } catch (error) {
+                console.error('Erro ao buscar dados:', error);
+                alert('Erro ao buscar dados.');
+            }
+        }
+    </script>
+</body>
+</html>
