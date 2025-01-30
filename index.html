@@ -10,12 +10,11 @@
     <div class="container">
       <img src="SPX.png" alt="Logo" class="logo">
         <h1>Ver Disponibilidade</h1>
-
         
         <input type="text" id="idInput" placeholder="Digite o ID" autocomplete="off">
         <button onclick="buscarDados()">Buscar</button>
 
-        <p id="resultado"></p>
+        <div id="resultado" class="resultado"></div>
     </div>
 
     <script>
@@ -37,12 +36,15 @@
                 for (let i = 1; i < rows.length; i++) {
                     const row = rows[i];
                     if (row[0] === id) {
-                        resultado = `Nome: ${row[1]}, Disponibilidade: ${row[2]}`;
+                        resultado = `
+                            <div><strong>Nome:</strong> ${row[1]}</div>
+                            <div><strong>Disponibilidade:</strong> ${row[2]}</div>
+                        `;
                         break;
                     }
                 }
 
-                document.getElementById('resultado').innerText = resultado;
+                document.getElementById('resultado').innerHTML = resultado;
 
             } catch (error) {
                 console.error('Erro ao buscar dados:', error);
