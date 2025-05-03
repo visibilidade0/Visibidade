@@ -1,56 +1,266 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VISIBILIDADE DISPONIBILIDADE</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consultar Disponibilidade</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #fff7f0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: white;
+      padding: 25px 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h2 {
+      color: #ff5722;
+      margin-bottom: 20px;
+      font-size: 20px;
+    }
+
+    input {
+      padding: 12px;
+      width: 100%;
+      margin-bottom: 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      text-align: center;
+      background-color: #f1f6ff;
+    }
+
+    button {
+      padding: 12px;
+      width: 100%;
+      background-color: #ff5722;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #e04e1e;
+    }
+
+    #resultado {
+      margin-top: 20px;
+      font-size: 16px;
+      min-height: 40px;
+      text-align: center;
+      word-wrap: break-word;
+    }
+
+    .loader {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 3px solid #ff5722;
+      border-top: 3px solid transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+      margin-left: 10px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* MODAL */
+    .modal {
+      position: fixed;
+      z-index: 999;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px 20px;
+      border-radius: 12px;
+      text-align: center;
+      max-width: 90%;
+      width: 320px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+
+    .modal-content h3 {
+      margin-top: 0;
+      color: #ff5722;
+      font-size: 18px;
+    }
+
+    .modal-content p {
+      font-size: 15px;
+      margin: 15px 0;
+    }
+
+    .modal-content button {
+      background-color: #ff5722;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 15px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .modal-content button:hover {
+      background-color: #e04e1e;
+    }
+
+    /* Emojis pulando */
+    .emoji-box {
+      margin-top: 15px;
+      font-size: 22px;
+      animation: bounce 0.6s ease-in-out infinite alternate;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 5px;
+      line-height: 1.2;
+    }
+
+    @keyframes bounce {
+      from { transform: translateY(0); }
+      to   { transform: translateY(-8px); }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 20px 15px;
+      }
+
+      h2 {
+        font-size: 18px;
+      }
+
+      input, button {
+        font-size: 15px;
+      }
+
+      #resultado {
+        font-size: 15px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-      <img src="entrega.png" alt="Logo" class="logo">
-        <h1>Ver Disponibilidade</h1>
-        
-        <input type="text" id="idInput" placeholder="Digite o ID" autocomplete="off">
-        <button onclick="buscarDados()">Buscar</button>
 
-        <div id="resultado" class="resultado"></div>
+  <!-- MODAL DE AVISO -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <h3>⚠️ Aviso importante</h3>
+      <p>Após atualizar sua disponibilidade, aguarde até <strong>30 segundos</strong> para que as informações fiquem visíveis aqui.</p>
+      <button onclick="fecharModal()">Entendi</button>
     </div>
+  </div>
 
-    <script>
-        const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRC0GS-d0PQiqYItdBsOSE89Qc0Xe2-BuGFXeDqv5myRNqrtRbwh3DgUvLGJimfLB5fUQ4vzma8OICi/pub?gid=0&single=true&output=csv';
+  <!-- CONTEÚDO PRINCIPAL -->
+  <div class="container">
+    <h2>Consultar Disponibilidade</h2>
+    <input type="text" id="idInput" placeholder="Digite seu ID" autocomplete="off" />
+    <button onclick="buscar()">Buscar</button>
+    <div id="resultado"></div>
+  </div>
 
-        async function buscarDados() {
-            const id = document.getElementById('idInput').value;
-            if (!id) {
-                alert('Digite um ID!');
-                return;
-            }
+  <script>
+    const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQaxDwD_E4FfSAnr6XeYnDmjGk4qz5xS_vm2O2x5iXEP33ZgpMunw3KUSplS5g7D5Hp3HLw_xweCa5n/pub?gid=0&single=true&output=csv';
 
-            try {
-                const response = await fetch(sheetUrl);
-                const csvText = await response.text();
-                const rows = csvText.split('\n').map(row => row.split(','));
-                let resultado = 'ID não encontrado!';
+    function fecharModal() {
+      document.getElementById('modal').style.display = 'none';
+    }
 
-                for (let i = 1; i < rows.length; i++) {
-                    const row = rows[i];
-                    if (row[0] === id) {
-                        resultado = `
-                            <div><strong>Nome:</strong> ${row[1]}</div>
-                            <div><strong>Disponibilidade:</strong> ${row[2]}</div>
-                        `;
-                        break;
-                    }
-                }
+    async function buscar() {
+      const idBuscado = document.getElementById('idInput').value.trim();
+      const resultado = document.getElementById('resultado');
 
-                document.getElementById('resultado').innerHTML = resultado;
+      if (!idBuscado) {
+        resultado.innerHTML = 'Por favor, insira um ID.';
+        return;
+      }
 
-            } catch (error) {
-                console.error('Erro ao buscar dados:', error);
-                alert('Erro ao buscar dados.');
-            }
+      resultado.innerHTML = 'Buscando... <span class="loader"></span>';
+
+      try {
+        const response = await fetch(sheetUrl);
+        const csv = await response.text();
+
+        const linhas = csv.trim().split('\n').map(l => l.split(','));
+        const cabecalho = linhas.shift();
+
+        const idxData = cabecalho.findIndex(col => col.toLowerCase().includes('data'));
+        const idxId = cabecalho.findIndex(col => col.trim().toLowerCase() === 'id');
+        const idxDisp = cabecalho.findIndex(col => col.toLowerCase().includes('amanhã'));
+
+        const registros = linhas
+          .map(l => ({
+            data: l[idxData],
+            id: l[idxId],
+            disponibilidade: l[idxDisp]
+          }))
+          .filter(r => r.id === idBuscado && r.data);
+
+        if (registros.length === 0) {
+          resultado.innerHTML = 'ID não encontrado.';
+          return;
         }
-    </script>
+
+        const ultimo = registros.sort((a, b) => {
+          const [d1, h1] = a.data.split(' ');
+          const [d2, h2] = b.data.split(' ');
+
+          const dataHoraA = new Date(d1.split('/').reverse().join('-') + 'T' + h1);
+          const dataHoraB = new Date(d2.split('/').reverse().join('-') + 'T' + h2);
+
+          return dataHoraB - dataHoraA;
+        })[0];
+
+        let emojis = '';
+        if (ultimo.disponibilidade.toLowerCase().includes('sim')) {
+          emojis = '<div class="emoji-box">' + '😄 '.repeat(20) + '</div>';
+        } else if (ultimo.disponibilidade.toLowerCase().includes('não')) {
+          emojis = '<div class="emoji-box">' + '😢 '.repeat(20) + '</div>';
+        }
+
+        resultado.innerHTML = `
+          <strong>Última resposta:</strong> ${ultimo.data}<br>
+          <strong>Disponibilidade para amanhã:</strong> ${ultimo.disponibilidade || 'Não informada'}
+          ${emojis}
+        `;
+      } catch (error) {
+        resultado.innerHTML = 'Erro ao buscar dados.';
+      }
+    }
+  </script>
 </body>
 </html>
